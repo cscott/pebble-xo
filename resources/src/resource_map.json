@@ -1,0 +1,12 @@
+{
+    "friendlyVersion": "dev_0.0",
+    "versionDefName": "XO_IMAGE_RESOURCES",
+
+    "media": [
+	{
+	    "type": "png",
+	    "defName": "IMAGE_XO_BACKGROUND",
+	    "file": "images/xo.png"
+	}
+    ]
+}
