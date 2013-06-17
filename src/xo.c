@@ -5,7 +5,7 @@
 
 #define MY_UUID { 0x0E, 0x80, 0x36, 0x38, 0x38, 0x61, 0x45, 0xC0, 0xB1, 0x37, 0xA5, 0xEC, 0xE8, 0xB0, 0x0A, 0xBF }
 PBL_APP_INFO(MY_UUID,
-             "XO Clock", "cscott.net",
+             "XO", "cscott.net",
              1, 0, /* App version */
              RESOURCE_ID_IMAGE_MENU_ICON,
              APP_INFO_WATCH_FACE);
@@ -19,7 +19,7 @@ BmpContainer image_container;
 void handle_init(AppContextRef ctx) {
     (void)ctx;
 
-    window_init(&window, "XO Clock");
+    window_init(&window, "XO");
     window_stack_push(&window, true /* Animated */);
 
     resource_init_current_app(&XO_IMAGE_RESOURCES);
@@ -34,7 +34,7 @@ void handle_init(AppContextRef ctx) {
     text_layer_set_text_color(&text_time_layer, GColorWhite);
     text_layer_set_text_alignment(&text_time_layer, GTextAlignmentCenter);
     text_layer_set_background_color(&text_time_layer, GColorClear);
-    layer_set_frame(&text_time_layer.layer, GRect(2, 168-23, 144-2, 168-3));
+    layer_set_frame(&text_time_layer.layer, GRect(2, 168-23, 144-4, 23));
     text_layer_set_font(&text_time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_BOLD_SUBSET_20)));
     layer_add_child(&window.layer, &text_time_layer.layer);
 }
