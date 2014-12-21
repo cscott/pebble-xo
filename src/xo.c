@@ -1,89 +1,76 @@
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "pebble_fonts.h"
+#include <pebble.h>
 
+static Window *s_window;
 
-#define MY_UUID { 0x0E, 0x80, 0x36, 0x38, 0x38, 0x61, 0x45, 0xC0, 0xB1, 0x37, 0xA5, 0xEC, 0xE8, 0xB0, 0x0A, 0xBF }
-PBL_APP_INFO(MY_UUID,
-             "XO", "cscott.net",
-             1, 0, /* App version */
-             RESOURCE_ID_IMAGE_MENU_ICON,
-             APP_INFO_WATCH_FACE);
+static TextLayer *s_time_layer;
 
-Window window;
+static GBitmap *s_background_image;
+static BitmapLayer *s_background_image_layer;
 
-TextLayer text_time_layer;
-
-BmpContainer image_container;
-
-void handle_init(AppContextRef ctx) {
-    (void)ctx;
-
-    window_init(&window, "XO");
-    window_stack_push(&window, true /* Animated */);
-
-    resource_init_current_app(&XO_IMAGE_RESOURCES);
-
-    // Note: This needs to be "de-inited" in the application's
-    //       deinit handler.
-    bmp_init_container(RESOURCE_ID_IMAGE_XO_BACKGROUND, &image_container);
-
-    layer_add_child(&window.layer, &image_container.layer.layer);
-
-    text_layer_init(&text_time_layer, window.layer.frame);
-    text_layer_set_text_color(&text_time_layer, GColorWhite);
-    text_layer_set_text_alignment(&text_time_layer, GTextAlignmentCenter);
-    text_layer_set_background_color(&text_time_layer, GColorClear);
-    layer_set_frame(&text_time_layer.layer, GRect(2, 168-23, 144-4, 23));
-    text_layer_set_font(&text_time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_BOLD_SUBSET_20)));
-    layer_add_child(&window.layer, &text_time_layer.layer);
+static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
+    // Create a long-lived buffer
+    static char buffer[] = "00:00";
+    clock_copy_time_string(buffer, sizeof(buffer));
+    // Display this time on the TextLayer
+    text_layer_set_text(s_time_layer, buffer);
 }
 
-void handle_deinit(AppContextRef ctx) {
-    (void)ctx;
+static void main_window_load(Window *window) {
+    time_t t = time(NULL);
+    struct tm * tm = localtime(&t);
+    GRect frame = GRect(0, 0, 144, 168);
+    window_set_background_color(window, GColorBlack);
+    // Init the background image
+    s_background_image = gbitmap_create_with_resource(
+        RESOURCE_ID_XO_BACKGROUND
+    );
+    s_background_image_layer = bitmap_layer_create(frame);
+    bitmap_layer_set_bitmap(s_background_image_layer, s_background_image);
+    layer_add_child(window_get_root_layer(window),
+                    bitmap_layer_get_layer(s_background_image_layer));
 
-    // Note: Failure to de-init this here will result in instability and
-    //       unable to allocate memory errors.
-    bmp_deinit_container(&image_container);
+    // Init the text layer used for the time
+    s_time_layer = text_layer_create(GRect(2, 168-23, 144-4, 23));
+    text_layer_set_text_color(s_time_layer, GColorWhite);
+    text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+    text_layer_set_background_color(s_time_layer, GColorClear);
+    text_layer_set_font(s_time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_BOLD_SUBSET_20)));
+    layer_add_child(window_get_root_layer(window),
+                    text_layer_get_layer(s_time_layer));
+
+    // Register with TickTimerService
+    tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
+    handle_minute_tick(tm, ~0);
 }
 
-void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *t) {
-
-  (void)ctx;
-
-  // Need to be static because they're used by the system later.
-  static char time_text[] = "00:00";
-
-  char *time_format;
-
-
-  if (clock_is_24h_style()) {
-    time_format = "%R";
-  } else {
-    time_format = "%I:%M";
-  }
-
-  string_format_time(time_text, sizeof(time_text), time_format, t->tick_time);
-
-  // Kludge to handle lack of non-padded hour format string
-  // for twelve hour clock.
-  if (!clock_is_24h_style() && (time_text[0] == '0')) {
-      time_text[0] = ' ';
-  }
-
-  text_layer_set_text(&text_time_layer, time_text);
-
+static void main_window_unload(Window *window) {
+    gbitmap_destroy(s_background_image);
+    bitmap_layer_destroy(s_background_image_layer);
+    text_layer_destroy(s_time_layer);
+    tick_timer_service_unsubscribe();
 }
 
+static void init() {
+    // Create main Window element and assign to pointer
+    s_window = window_create();
 
-void pbl_main(void *params) {
-    PebbleAppHandlers handlers = {
-        .init_handler = &handle_init,
-        .deinit_handler = &handle_deinit,
-        .tick_info = {
-            .tick_handler = &handle_minute_tick,
-            .tick_units = MINUTE_UNIT
-        }
-    };
-    app_event_loop(params, &handlers);
+    // Set handlers to manage the elements inside the Window
+    window_set_window_handlers(s_window, (WindowHandlers) {
+        .load = main_window_load,
+        .unload = main_window_unload
+    });
+
+    // Show the Window on the watch, with animated=true
+    window_stack_push(s_window, true /* Animated */);
+}
+
+static void deinit() {
+    // Destroy Window
+    window_destroy(s_window);
+}
+
+int main(void) {
+    init();
+    app_event_loop();
+    deinit();
 }
