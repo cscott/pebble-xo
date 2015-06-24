@@ -1,37 +1,42 @@
 {
-    "appKeys": {},
-    "capabilities": [
-        ""
-    ],
-    "companyName": "cscott@cscott.net",
-    "longName": "XO",
-    "projectType": "native",
-    "resources": {
-        "media": [
-            {
-                "characterRegex": "[:0-9]",
-                "file": "fonts/Roboto-Bold.ttf",
-                "name": "FONT_ROBOTO_BOLD_SUBSET_20",
-                "type": "font"
-            },
-            {
-                "file": "images/menu_icon_xo.png",
-                "menuIcon": true,
-                "name": "XO_ICON",
-                "type": "png"
-            },
-            {
-                "file": "images/xo.png",
-                "name": "XO_BACKGROUND",
-                "type": "png"
-            }
-        ]
-    },
-    "shortName": "XO",
-    "uuid": "0e803638-3861-45c0-b137-a5ece8b00abf",
-    "versionCode": 1,
-    "versionLabel": "1.1",
-    "watchapp": {
-        "watchface": true
-    }
+  "appKeys": {},
+  "capabilities": [
+    ""
+  ],
+  "companyName": "cscott@cscott.net",
+  "longName": "XO",
+  "projectType": "native",
+  "resources": {
+    "media": [
+      {
+        "characterRegex": "[:0-9]",
+        "file": "fonts/Roboto-Bold.ttf",
+        "name": "FONT_ROBOTO_BOLD_SUBSET_20",
+        "type": "font"
+      },
+      {
+        "file": "images/menu_icon_xo.png",
+        "menuIcon": true,
+        "name": "XO_ICON",
+        "type": "png"
+      },
+      {
+        "file": "images/xo.png",
+        "name": "XO_BACKGROUND",
+        "type": "png"
+      }
+    ]
+  },
+  "shortName": "XO",
+  "uuid": "0e803638-3861-45c0-b137-a5ece8b00abf",
+  "versionCode": 1,
+  "versionLabel": "1.1",
+  "watchapp": {
+    "watchface": true
+  },
+  "targetPlatforms": [
+    "aplite",
+    "basalt"
+  ],
+  "sdkVersion": "3"
 }
